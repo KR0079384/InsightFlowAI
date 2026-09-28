@@ -1,4 +1,4 @@
-# TraceIQ — AI Decision Engine for Business Data
+# InsightFlowAI — AI Decision Engine for Business Data
 
 > **Turn scattered business data into accurate answers and decisions you can trace.**
 
