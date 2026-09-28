@@ -1,0 +1,6 @@
+supplier_id,name,product_id,avg_lead_days,reliability_score,on_time_rate,notes
+SUPP-101,Apex Electronics Ltd,PROD-001,10,0.74,0.68,Experienced shipping delays in Sep 2026
+SUPP-102,Zenith MicroTech,PROD-002,7,0.92,0.95,Stable supplier
+SUPP-103,SonicCraft Audio,PROD-003,5,0.9,0.91,Stable supplier
+SUPP-104,VisionWare Optical,PROD-004,6,0.88,0.89,Consistent deliveries
+SUPP-105,Forma Ergonomics,PROD-005,4,0.95,0.97,Local partner

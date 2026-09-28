@@ -1,0 +1,6 @@
+product_id,name,category,cost_price,unit_price,target_reorder_qty,lead_time_days
+PROD-001,AeroMax Pro Headphones,Audio,120.0,250.0,500,10
+PROD-002,PulseFit Smartwatch,Wearables,60.0,130.0,600,7
+PROD-003,EchoSound Speaker,Audio,35.0,80.0,400,5
+PROD-004,ClearVision 4K Webcam,Accessories,45.0,100.0,350,6
+PROD-005,ErgoLift Laptop Stand,Accessories,20.0,50.0,300,4
