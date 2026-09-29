@@ -20,11 +20,18 @@ Validates evidence structure integrity:
 Tests scenario simulation calculations:
 - Ensures increasing safety stock and reducing lead times yields fewer stockout days and positive revenue recovery.
 
+### `test_intent.py`
+Unit test suite for natural language intent classification:
+- Tests multiple natural language formulations for `revenue_decline_analysis`, `stockout_analysis`, `product_performance`, `simulation`, and `anomaly_detection`.
+- Validates product alias mapping to catalog IDs (`PROD-001` through `PROD-005`).
+- Verifies explicit percentage parameter extraction for simulation queries.
+- Tests safe fallback to `unknown` intent for ambiguous, off-topic, or empty queries.
+
 ### `test_api.py`
 Integration tests for FastAPI endpoints:
 - `GET /api/v1/health`
 - `GET /api/v1/overview`
-- `POST /api/v1/analyze`
+- `POST /api/v1/analyze` (supported & unsupported queries)
 - `POST /api/v1/simulate`
 
 ## Running Tests

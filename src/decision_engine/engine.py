@@ -24,6 +24,49 @@ class DecisionEngine:
         """Processes a business question, orchestrating deterministic metrics, drivers, evidence, and simulations."""
         parsed_intent = self.intent.classify(query)
         
+        # 5. Default Simulation baseline
+        default_sim_req = SimulationRequest(
+            product_id="PROD-001",
+            reorder_quantity_delta_pct=20.0,
+            lead_time_days_reduction=3,
+            marketing_budget_delta_pct=0.0,
+            price_change_pct=0.0
+        )
+        sim_response = self.simulator.run_simulation(default_sim_req)
+
+        # Safe response for ambiguous or unsupported queries
+        if parsed_intent.get("intent") == "unknown":
+            return DecisionReport(
+                query=query,
+                executive_answer=(
+                    "TraceIQ could not classify your query into a supported business decision topic. "
+                    "Supported domains include: Revenue Decline & Root Cause Analysis, Stock-out & Inventory Depletion, "
+                    "Product & SKU Performance, Anomalies & Variances, and What-If Scenario Simulations."
+                ),
+                why_explanation=(
+                    "Your query does not match TraceIQ's supported business decision domains. Please rephrase your question around one of the following topics:\n"
+                    "• Revenue Decline: 'Why did revenue drop in September?' or 'What drove the sales decline?'\n"
+                    "• Stockouts: 'Which products ran out of stock?' or 'Show inventory depletion for AeroMax'\n"
+                    "• Product Performance: 'How are AeroMax headphones performing?' or 'Show SKU breakdown'\n"
+                    "• Simulations: 'What if we increase reorder quantity by 20%?'"
+                ),
+                key_metrics=[],
+                drivers=[],
+                recommendation=RecommendationAction(
+                    id="rec-unsupported-000",
+                    title="Rephrase Question Around Supported Business Domains",
+                    description="No automated recommendation can be generated for unsupported or ambiguous questions.",
+                    urgency="low",
+                    expected_impact="N/A - Query outside supported scope",
+                    estimated_revenue_recovery=0.0,
+                    action_type="none",
+                    default_parameters={}
+                ),
+                evidence_list=[],
+                default_simulation=sim_response,
+                timestamp=datetime.utcnow().isoformat() + "Z"
+            )
+
         # 1. Deterministic Metrics
         key_metrics = self.metrics.get_key_metrics_summary(current_period="2026-09", previous_period="2026-08")
         growth_info = self.metrics.get_revenue_growth(current_period="2026-09", previous_period="2026-08")
@@ -49,16 +92,6 @@ class DecisionEngine:
                 "lead_time_days_reduction": 3
             }
         )
-
-        # 5. Default Simulation
-        default_sim_req = SimulationRequest(
-            product_id="PROD-001",
-            reorder_quantity_delta_pct=20.0,
-            lead_time_days_reduction=3,
-            marketing_budget_delta_pct=0.0,
-            price_change_pct=0.0
-        )
-        sim_response = self.simulator.run_simulation(default_sim_req)
 
         # 6. Executive Narrative
         exec_answer = (
