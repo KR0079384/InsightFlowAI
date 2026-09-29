@@ -50,12 +50,12 @@ class EvidenceEngine:
 
         return EvidenceItem(
             id=f"ev-stockout-{product_id}",
-            claim=f"{pname} ({product_id}) suffered {days_count} consecutive stock-out days (Sep 11–Sep 18), creating an estimated 73 units of unmet customer demand.",
+            claim=f"{pname} ({product_id}) suffered {days_count} consecutive stock-out days (Sep 11–Sep 18) with an estimated stockout opportunity of $15,200.00.",
             metric="stockout_days",
             period=f"{period} (Sep 11 to Sep 18)",
             comparison="August baseline (0 stock-out days)",
             calculation="COUNT(inventory.is_stock_out == 1 WHERE product_id == 'PROD-001')",
-            formula=f"8 stock-out days × 7.6 avg daily units demand × $250.00 unit price = ~$15,200 to $18,250 unfulfilled revenue loss",
+            formula="8 stockout days × 7.6 avg daily units × $250.00 unit price ≈ $15,200.00 estimated stockout opportunity (Observed historical revenue decline: -$18,250.00)",
             source_files=["inventory.csv", "products.csv", "suppliers.csv"],
             sample_rows=sample_rows,
             confidence_score=1.0
@@ -74,12 +74,12 @@ class EvidenceEngine:
 
         return EvidenceItem(
             id=f"ev-mktg-{product_id}",
-            claim=f"{pname} ({product_id}) experienced an 18.00% revenue decline coinciding with a 50% top-of-funnel ad spend reduction in September.",
+            claim=f"{pname} ({product_id}) experienced an 18.00% revenue decline during the same period that top-of-funnel ad spend in key regional territories decreased 51.61% in September.",
             metric="marketing_spend_vs_orders",
             period=period,
             comparison=previous_period,
             calculation="SUM(marketing.spend[2026-09]) vs SUM(marketing.spend[2026-08])",
-            formula="August Ad Spend: $4,650 ($150/day) → September Ad Spend: $2,250 ($75/day) [-51.6% spend change]",
+            formula="August Ad Spend: $4,650.00 ($150/day) → September Ad Spend: $2,250.00 ($75/day) [-51.61% spend change]",
             source_files=["marketing.csv", "orders.csv"],
             sample_rows=sample_rows,
             confidence_score=1.0

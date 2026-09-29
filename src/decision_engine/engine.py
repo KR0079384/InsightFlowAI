@@ -85,8 +85,8 @@ class DecisionEngine:
             title="Prioritize Replenishment & Increase Safety Stock for AeroMax Pro Headphones",
             description="Increase baseline reorder quantity from 500 units to 600 units (+20%) and enforce expedited 7-day supplier SLA with Apex Electronics Ltd (SUPP-101) to eliminate stockout recurrence.",
             urgency="high",
-            expected_impact="Recovers an estimated $18,250/mo by eliminating 8 stock-out days and fulfilling uncaptured customer demand.",
-            estimated_revenue_recovery=18250.0,
+            expected_impact="Under the tested simulation scenario, projected monthly revenue increases by $15,000.00 (projected scenario impact, historical decline was -$18,250.00).",
+            estimated_revenue_recovery=15000.0,
             action_type="reorder",
             default_parameters={
                 "product_id": "PROD-001",
@@ -106,7 +106,7 @@ class DecisionEngine:
         )
 
         default_why_explanation = (
-            "- AeroMax Pro Headphones (PROD-001) revenue declined 30.93% (-$18,250.00) with 8 stockout days from September 11 to September 18, 2026, and an estimated unmet demand of 73 units.\n"
+            "- AeroMax Pro Headphones (PROD-001) revenue declined 30.93% (-$18,250.00) with 8 stockout days from September 11 to September 18, 2026, and an estimated stockout opportunity of $15,200.00.\n"
             "- PulseFit Smartwatch (PROD-002) revenue declined 18.00% (-$7,020.00) while regional digital marketing spend decreased 51.61% (-$2,400.00, from $4,650.00 to $2,250.00).\n"
             "- ClearVision 4K Webcam (PROD-004) revenue grew 68.00% (+$6,800.00), which partially offset negative revenue variances."
         )

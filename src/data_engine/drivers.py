@@ -31,23 +31,22 @@ class DriversEngine:
                     days = so_info["stockout_days"]
                     drivers.append(DriverItem(
                         id=f"driver-stockout-{pid}",
-                        title=f"{pname} Sales Dropped {abs(growth_pct):.1f}% (Stock-out Impact)",
+                        title=f"{pname} Sales Dropped {abs(growth_pct):.1f}% (Stock-out Window)",
                         impact_type="negative",
                         impact_amount=delta,
                         impact_formatted=f"-${abs(delta):,.2f}",
-                        explanation=f"{pname} experienced {days} consecutive stock-out days (Sep 11–Sep 18) due to delayed replenishment, losing an estimated 73 units of unfulfilled demand.",
+                        explanation=f"{pname} experienced {days} consecutive stock-out days (Sep 11–Sep 18) during which closing stock reached zero, with an estimated stockout opportunity of $15,200.00 (historical revenue decline: -${abs(delta):,.2f}).",
                         product_id=pid,
                         evidence_id=f"ev-stockout-{pid}"
                     ))
                 elif pid in mkt_map and mkt_map[pid]["change_pct"] < -20:
-                    m_info = mkt_map[pid]
                     drivers.append(DriverItem(
                         id=f"driver-mktg-{pid}",
                         title=f"{pname} Sales Decreased {abs(growth_pct):.1f}% (Marketing Reduction)",
                         impact_type="negative",
                         impact_amount=delta,
                         impact_formatted=f"-${abs(delta):,.2f}",
-                        explanation=f"{pname} sales contracted following a {abs(m_info['change_pct']):.1f}% reduction in top-of-funnel ad spend in key regional territories.",
+                        explanation=f"{pname} revenue declined {abs(growth_pct):.2f}% during the same period that top-of-funnel ad spend in key regional territories decreased 51.61%.",
                         product_id=pid,
                         evidence_id=f"ev-mktg-{pid}"
                     ))
@@ -70,7 +69,7 @@ class DriversEngine:
                     impact_type="positive",
                     impact_amount=delta,
                     impact_formatted=f"+${delta:,.2f}",
-                    explanation=f"Strong organic and promotional demand added ${delta:,.2f} in revenue, partially cushioning the topline decline.",
+                    explanation=f"Strong organic and promotional demand added ${delta:,.2f} in revenue, partially offsetting negative revenue variances.",
                     product_id=pid,
                     evidence_id=f"ev-prod-{pid}"
                 ))

@@ -100,8 +100,8 @@ class SimulatorEngine:
         summary = (
             f"Increasing {pname} reorder batch by {request.reorder_quantity_delta_pct:.0f}% "
             f"(to {simulated_reorder_qty} units) and reducing supplier lead time by {lead_time_days_saved} days "
-            f"eliminates {curr_stockout_days - simulated_stockout_days} stock-out days, fulfilling {recovered_units} lost orders "
-            f"and generating an estimated +${revenue_delta:,.2f} in recovered monthly revenue."
+            f"eliminates {curr_stockout_days - simulated_stockout_days} stock-out days, fulfilling {recovered_units} additional units "
+            f"and generating an estimated +${revenue_delta:,.2f} in projected scenario monthly revenue."
         )
 
         return SimulationResponse(
