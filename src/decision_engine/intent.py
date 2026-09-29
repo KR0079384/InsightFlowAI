@@ -93,7 +93,7 @@ class IntentClassifier:
         return None
 
     def _extract_reorder_percentage(self, query: str) -> float:
-        """
+        r"""
         Unambiguously extracts numerical percentage parameter (e.g., 25%, 15.5 percent, 20 pct).
         Uses 'percent\b' and 'pct\b' word boundary assertions while allowing '%' without \b
         (since % is non-word \W in regex and not followed by \w word characters).
