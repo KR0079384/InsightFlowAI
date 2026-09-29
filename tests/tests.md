@@ -27,11 +27,19 @@ Unit test suite for natural language intent classification:
 - Verifies explicit percentage parameter extraction for simulation queries.
 - Tests safe fallback to `unknown` intent for ambiguous, off-topic, or empty queries.
 
+### `test_llm.py`
+Unit test suite for local Ollama LLM synthesizer:
+- Tests grounded prompt generation, valid narrative parsing, connection failure fallback, request timeouts, malformed JSON handling, and ungrounded number rejection.
+
+### `test_engine.py`
+Unit test suite for `DecisionEngine` orchestration:
+- Validates LLM dependency injection, exception handling, and unknown intent behavior.
+
 ### `test_api.py`
 Integration tests for FastAPI endpoints:
 - `GET /api/v1/health`
 - `GET /api/v1/overview`
-- `POST /api/v1/analyze` (supported & unsupported queries)
+- `POST /api/v1/analyze` (supported queries, LLM synthesis success, LLM fallback, unsupported queries)
 - `POST /api/v1/simulate`
 
 ## Running Tests

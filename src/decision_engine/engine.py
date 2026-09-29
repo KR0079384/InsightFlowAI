@@ -5,6 +5,7 @@ from src.data_engine.drivers import drivers_engine
 from src.data_engine.simulator import simulator_engine
 from src.decision_engine.evidence import evidence_engine
 from src.decision_engine.intent import intent_classifier
+from src.decision_engine.llm import llm_synthesizer
 from src.models.schemas import (
     DecisionReport,
     RecommendationAction,
@@ -13,12 +14,13 @@ from src.models.schemas import (
 )
 
 class DecisionEngine:
-    def __init__(self, metrics=None, drivers=None, evidence=None, simulator=None, intent=None):
+    def __init__(self, metrics=None, drivers=None, evidence=None, simulator=None, intent=None, llm=None):
         self.metrics = metrics or metrics_engine
         self.drivers = drivers or drivers_engine
         self.evidence = evidence or evidence_engine
         self.simulator = simulator or simulator_engine
         self.intent = intent or intent_classifier
+        self.llm = llm or llm_synthesizer
 
     def analyze_query(self, query: str) -> DecisionReport:
         """Processes a business question, orchestrating deterministic metrics, drivers, evidence, and simulations."""
@@ -93,19 +95,28 @@ class DecisionEngine:
             }
         )
 
-        # 6. Executive Narrative
-        exec_answer = (
-            f"September 2026 revenue declined by {abs(growth_info['growth_pct']):.2f}% "
-            f"(${growth_info['current_revenue']:,.2f} vs ${growth_info['previous_revenue']:,.2f} in August). "
-            f"The primary cause was an 8-day inventory stock-out on our flagship AeroMax Pro Headphones (PROD-001), "
-            f"compounded by reduced top-of-funnel marketing for PulseFit Smartwatch."
+        # 6. Executive Narrative (Deterministic Fallback Baseline)
+        default_exec_answer = (
+            f"September 2026 revenue was ${growth_info['current_revenue']:,.2f}, compared with ${growth_info['previous_revenue']:,.2f} in August 2026, "
+            f"representing a {abs(growth_info['growth_pct']):.2f}% decline. "
+            f"Observed historical factors include an 8-day inventory stockout for AeroMax Pro Headphones (PROD-001) "
+            f"and a 51.61% digital marketing spend reduction for PulseFit Smartwatch (PROD-002). "
+            f"These events occurred during the same reporting period, but the available data does not establish which individual factor caused the total revenue decline. "
+            f"Default simulation scenario projects a potential revenue increase of $15,000.00 under specified operational assumptions as a hypothetical projection."
         )
 
-        why_explanation = (
-            "• AeroMax Pro Headphones (PROD-001) sales dropped 30.93% (-$18,250) after inventory hit 0 from Sep 11 to Sep 18 due to supplier lead-time delay.\n"
-            "• PulseFit Smartwatch (PROD-002) sales decreased 18.00% (-$7,020) after regional digital marketing spend was curtailed by 50%.\n"
-            "• ClearVision 4K Webcam (+65.0% / +$6,500) and EchoSound Speaker (+2.5%) saw positive growth, partially offsetting top-line contraction."
+        default_why_explanation = (
+            "- AeroMax Pro Headphones (PROD-001) revenue declined 30.93% (-$18,250.00) with 8 stockout days from September 11 to September 18, 2026, and an estimated unmet demand of 73 units.\n"
+            "- PulseFit Smartwatch (PROD-002) revenue declined 18.00% (-$7,020.00) while regional digital marketing spend decreased 51.61% (-$2,400.00, from $4,650.00 to $2,250.00).\n"
+            "- ClearVision 4K Webcam (PROD-004) revenue grew 68.00% (+$6,800.00), which partially offset negative revenue variances."
         )
+
+        exec_answer = default_exec_answer
+        why_explanation = default_why_explanation
+
+        # 7. Keep deterministic narrative authoritative.
+        # Ollama must not overwrite verified business facts.
+        # The LLM can be used later for optional, non-authoritative features.
 
         return DecisionReport(
             query=query,

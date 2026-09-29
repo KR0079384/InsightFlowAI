@@ -44,6 +44,8 @@ class LLMSynthesizer:
         elif isinstance(data, (list, tuple)):
             for item in data:
                 numbers.update(self._extract_all_numbers(item))
+        elif hasattr(data, "model_dump") and callable(getattr(data, "model_dump")):
+            numbers.update(self._extract_all_numbers(data.model_dump()))
         elif hasattr(data, "dict") and callable(getattr(data, "dict")):
             numbers.update(self._extract_all_numbers(data.dict()))
         elif hasattr(data, "__dict__"):
@@ -100,6 +102,8 @@ class LLMSynthesizer:
         simulation: Optional[Any] = None
     ) -> str:
         def serialize_item(obj):
+            if hasattr(obj, "model_dump") and callable(getattr(obj, "model_dump")):
+                return obj.model_dump()
             if hasattr(obj, "dict") and callable(getattr(obj, "dict")):
                 return obj.dict()
             if hasattr(obj, "__dict__"):
