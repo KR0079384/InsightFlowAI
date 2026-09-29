@@ -30,6 +30,16 @@ def test_api_analyze():
     assert "recommendation" in data
     assert "default_simulation" in data
 
+def test_api_analyze_unsupported_query():
+    res = client.post("/api/v1/analyze", json={"question": "What is the weather in Tokyo?"})
+    assert res.status_code == 200
+    data = res.json()
+    assert "could not classify" in data["executive_answer"].lower()
+    assert len(data["key_metrics"]) == 0
+    assert len(data["drivers"]) == 0
+    assert len(data["evidence_list"]) == 0
+    assert data["recommendation"]["action_type"] == "none"
+
 def test_api_simulate():
     res = client.post("/api/v1/simulate", json={
         "product_id": "PROD-001",

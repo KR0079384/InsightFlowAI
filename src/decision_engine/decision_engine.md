@@ -6,7 +6,7 @@ Orchestrates the TraceIQ **Observe → Explain → Recommend → Simulate** work
 ## Files
 
 ### `intent.py`
-Natural language intent classifier & parameter extractor. Identifies whether the query relates to revenue decline analysis, stock-out investigations, product performance comparisons, or scenario simulations.
+Natural language intent classifier & parameter extractor. Identifies whether the query relates to revenue decline analysis, stock-out investigations, product performance comparisons, anomaly detection, or scenario simulations. Maps product aliases to verified catalog IDs, extracts numerical simulation parameters, and returns an `unknown` intent for off-topic/ambiguous queries.
 
 ### `evidence.py`
 Builds verifiable evidence objects:
