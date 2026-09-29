@@ -80,6 +80,96 @@ class LLMSynthesizer:
 
         return True
 
+    def validate_narrative(
+        self,
+        exec_answer: str,
+        why_explanation: str,
+        context_payload: Dict[str, Any],
+    ) -> tuple[bool, List[str]]:
+        # """
+        # Validates an LLM-generated narrative before it can be accepted.
+
+        # The LLM is not allowed to:
+        # - introduce unsupported business numbers
+        # - assert unsupported causality
+        # - introduce unsupported recommendations
+        # - make guarantees about simulations or outcomes
+
+        # Returns:
+        #     (True, []) when the narrative is safe.
+        #     (False, [errors]) when validation fails.
+        # """
+        errors: List[str] = []
+
+        if not exec_answer or not why_explanation:
+            errors.append("Missing required narrative fields")
+            return False, errors
+
+        full_text = f"{exec_answer} {why_explanation}"
+
+        # ---------------------------------------------------------
+        # 1. Numeric grounding
+        # ---------------------------------------------------------
+        context_numbers = self._extract_all_numbers(context_payload)
+
+        if not self.validate_grounding(full_text, context_numbers):
+            errors.append(
+                "Narrative contains numeric values not present in deterministic context"
+            )
+
+        # ---------------------------------------------------------
+        # 2. Unsupported causal claims
+        # ---------------------------------------------------------
+        causal_patterns = [
+            r"\bprimary cause\b",
+            r"\bmain cause\b",
+            r"\broot cause\b",
+            r"\bcaused by\b",
+            r"\bdue to\b",
+            r"\bresulted from\b",
+            r"\bresulting from\b",
+            r"\bled to\b",
+            r"\blead to\b",
+            r"\bdriven by\b",
+            r"\bcaused\b",
+            r"\bcontributed to\b",
+            r"\bcompounded by\b",
+            r"\blinked to\b",
+            r"\bbecause of\b",
+        ]
+
+        lowered_text = full_text.lower()
+
+        for pattern in causal_patterns:
+            if re.search(pattern, lowered_text):
+                errors.append(
+                    f"Unsupported causal language detected: {pattern}"
+                )
+
+        # ---------------------------------------------------------
+        # 3. Unsupported recommendation / outcome claims
+        # ---------------------------------------------------------
+        unsafe_outcome_patterns = [
+            r"\bguarantees?\b",
+            r"\beliminates?\b",
+            r"\bdirectly reduces?\b",
+            r"\bboosts revenue\b",
+            r"\brecovers revenue\b",
+            r"\bimproves roi\b",
+            r"\bwill recover\b",
+            r"\bwill eliminate\b",
+            r"\bwill increase\b",
+            r"\bwill reduce\b",
+        ]
+
+        for pattern in unsafe_outcome_patterns:
+            if re.search(pattern, lowered_text):
+                errors.append(
+                    f"Unsupported outcome/recommendation language detected: {pattern}"
+                )
+
+        return len(errors) == 0, errors
+    
     def build_system_prompt(self) -> str:
         return (
             "You are TraceIQ's executive narrative synthesis engine.\n"
@@ -188,26 +278,37 @@ class LLMSynthesizer:
                     fallback_signal["error"] = "Missing required narrative fields"
                     return fallback_signal
 
-                context_payload = {
-                    "metrics": key_metrics,
-                    "drivers": drivers,
-                    "evidence": evidence_list,
-                    "simulation": simulation,
-                    "intent": intent_metadata
-                }
-                context_numbers = self._extract_all_numbers(context_payload)
+            context_payload = {
+                "metrics": key_metrics,
+                "drivers": drivers,
+                "evidence": evidence_list,
+                "simulation": simulation,
+                "intent": intent_metadata,
+            }
 
-                full_text = f"{exec_answer} {why_explanation}"
-                if not self.validate_grounding(full_text, context_numbers):
+            is_valid, validation_errors = self.validate_narrative(
+                exec_answer=exec_answer,
+                why_explanation=why_explanation,
+                context_payload=context_payload,
+            )
+
+            if not is_valid:
+                if any(
+                    "numeric values not present" in error
+                    for error in validation_errors
+                ):
                     fallback_signal["error"] = "Numeric grounding validation failed"
-                    return fallback_signal
+                else:
+                    fallback_signal["error"] = "Narrative validation failed"
 
-                return {
-                    "success": True,
-                    "executive_answer": str(exec_answer),
-                    "why_explanation": str(why_explanation),
-                    "error": None
-                }
+                return fallback_signal
+
+            return {
+                "success": True,
+                "executive_answer": str(exec_answer),
+                "why_explanation": str(why_explanation),
+                "error": None,
+            }
 
         except (httpx.RequestError, httpx.TimeoutException, json.JSONDecodeError, Exception) as e:
             fallback_signal["error"] = str(type(e).__name__)
