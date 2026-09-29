@@ -35,7 +35,7 @@ class DriversEngine:
                         impact_type="negative",
                         impact_amount=delta,
                         impact_formatted=f"-${abs(delta):,.2f}",
-                        explanation=f"{pname} experienced {days} consecutive stock-out days (Sep 11–Sep 18) due to delayed replenishment, losing an estimated 73 units of unfulfilled demand.",
+                        explanation=f"{pname} experienced {days} consecutive stock-out days (September 11 to September 18) during which inventory reached 0, coinciding with an estimated 73 units of unfulfilled demand.",
                         product_id=pid,
                         evidence_id=f"ev-stockout-{pid}"
                     ))
@@ -47,7 +47,7 @@ class DriversEngine:
                         impact_type="negative",
                         impact_amount=delta,
                         impact_formatted=f"-${abs(delta):,.2f}",
-                        explanation=f"{pname} sales contracted following a {abs(m_info['change_pct']):.1f}% reduction in top-of-funnel ad spend in key regional territories.",
+                        explanation=f"{pname} sales contracted while top-of-funnel digital marketing spend was reduced by {abs(m_info['change_pct']):.1f}% in key regional territories.",
                         product_id=pid,
                         evidence_id=f"ev-mktg-{pid}"
                     ))
