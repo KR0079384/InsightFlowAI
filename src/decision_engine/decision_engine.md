@@ -14,11 +14,14 @@ Builds verifiable evidence objects:
 - Identifies participating data sources (`orders.csv`, `inventory.csv`, `products.csv`, `marketing.csv`).
 - Extracts verifiable sample rows showing timestamps, quantities, and raw prices.
 
+### `llm.py`
+Local LLM synthesis module for TraceIQ using local Ollama (`qwen3:8b`). Constructs grounded prompts from verified deterministic context, validates generated numerical claims against input context, and handles connection failures/timeouts gracefully.
+
 ### `engine.py`
 Primary decision orchestration engine:
 - Ingests user query.
 - Executes deterministic calculations from `data_engine/metrics.py` and `data_engine/drivers.py`.
-- Formulates high-level Executive Answer and Root-Cause Why breakdown.
+- Delegates narrative synthesis to `llm.py` with dependency injection, falling back to deterministic template strings if Ollama is unavailable, times out, or fails grounding validation.
 - Links structured evidence and generates prescriptive recommendations with default simulation parameters.
 
 ## Relationships

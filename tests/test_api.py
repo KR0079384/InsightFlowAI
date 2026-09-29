@@ -40,6 +40,50 @@ def test_api_analyze_unsupported_query():
     assert len(data["evidence_list"]) == 0
     assert data["recommendation"]["action_type"] == "none"
 
+def test_api_analyze_with_llm_synthesis_success(monkeypatch):
+    mock_llm_result = {
+        "success": True,
+        "executive_answer": "LLM Synthesized: Revenue dropped by 13.80% in September due to stockouts.",
+        "why_explanation": "LLM Explanation: AeroMax Pro suffered 8 stockout days."
+    }
+    monkeypatch.setattr(
+        "src.decision_engine.engine.llm_synthesizer.synthesize",
+        lambda **kwargs: mock_llm_result
+    )
+
+    res = client.post("/api/v1/analyze", json={"question": "Why did revenue drop in September?"})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["executive_answer"] == mock_llm_result["executive_answer"]
+    assert data["why_explanation"] == mock_llm_result["why_explanation"]
+    # Verify deterministic fields remain intact
+    assert len(data["key_metrics"]) > 0
+    assert len(data["drivers"]) > 0
+    assert len(data["evidence_list"]) > 0
+    assert "recommendation" in data
+    assert "default_simulation" in data
+
+def test_api_analyze_with_llm_fallback(monkeypatch):
+    # Mock LLM failure (e.g. Ollama offline or grounding validation fail)
+    mock_llm_result = {
+        "success": False,
+        "executive_answer": None,
+        "why_explanation": None,
+        "error": "ConnectError"
+    }
+    monkeypatch.setattr(
+        "src.decision_engine.engine.llm_synthesizer.synthesize",
+        lambda **kwargs: mock_llm_result
+    )
+
+    res = client.post("/api/v1/analyze", json={"question": "Why did revenue drop in September?"})
+    assert res.status_code == 200
+    data = res.json()
+    # Verify deterministic fallback narrative is returned
+    assert "September 2026 revenue declined" in data["executive_answer"]
+    assert "AeroMax Pro Headphones" in data["why_explanation"]
+    assert len(data["key_metrics"]) > 0
+
 def test_api_simulate():
     res = client.post("/api/v1/simulate", json={
         "product_id": "PROD-001",

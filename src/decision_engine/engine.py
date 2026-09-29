@@ -5,6 +5,7 @@ from src.data_engine.drivers import drivers_engine
 from src.data_engine.simulator import simulator_engine
 from src.decision_engine.evidence import evidence_engine
 from src.decision_engine.intent import intent_classifier
+from src.decision_engine.llm import llm_synthesizer
 from src.models.schemas import (
     DecisionReport,
     RecommendationAction,
@@ -13,12 +14,13 @@ from src.models.schemas import (
 )
 
 class DecisionEngine:
-    def __init__(self, metrics=None, drivers=None, evidence=None, simulator=None, intent=None):
+    def __init__(self, metrics=None, drivers=None, evidence=None, simulator=None, intent=None, llm=None):
         self.metrics = metrics or metrics_engine
         self.drivers = drivers or drivers_engine
         self.evidence = evidence or evidence_engine
         self.simulator = simulator or simulator_engine
         self.intent = intent or intent_classifier
+        self.llm = llm or llm_synthesizer
 
     def analyze_query(self, query: str) -> DecisionReport:
         """Processes a business question, orchestrating deterministic metrics, drivers, evidence, and simulations."""
@@ -93,19 +95,41 @@ class DecisionEngine:
             }
         )
 
-        # 6. Executive Narrative
-        exec_answer = (
+        # 6. Executive Narrative (Deterministic Fallback Baseline)
+        default_exec_answer = (
             f"September 2026 revenue declined by {abs(growth_info['growth_pct']):.2f}% "
             f"(${growth_info['current_revenue']:,.2f} vs ${growth_info['previous_revenue']:,.2f} in August). "
             f"The primary cause was an 8-day inventory stock-out on our flagship AeroMax Pro Headphones (PROD-001), "
             f"compounded by reduced top-of-funnel marketing for PulseFit Smartwatch."
         )
 
-        why_explanation = (
+        default_why_explanation = (
             "• AeroMax Pro Headphones (PROD-001) sales dropped 30.93% (-$18,250) after inventory hit 0 from Sep 11 to Sep 18 due to supplier lead-time delay.\n"
             "• PulseFit Smartwatch (PROD-002) sales decreased 18.00% (-$7,020) after regional digital marketing spend was curtailed by 50%.\n"
             "• ClearVision 4K Webcam (+65.0% / +$6,500) and EchoSound Speaker (+2.5%) saw positive growth, partially offsetting top-line contraction."
         )
+
+        exec_answer = default_exec_answer
+        why_explanation = default_why_explanation
+
+        # 7. LLM Narrative Synthesis (Grounded Narrative override)
+        if self.llm:
+            try:
+                llm_res = self.llm.synthesize(
+                    query=query,
+                    intent_metadata=parsed_intent,
+                    key_metrics=key_metrics,
+                    drivers=driver_items,
+                    evidence_list=evidence_list,
+                    simulation=sim_response
+                )
+                if llm_res and llm_res.get("success") and llm_res.get("executive_answer") and llm_res.get("why_explanation"):
+                    exec_answer = str(llm_res["executive_answer"]).strip()
+                    why_explanation = str(llm_res["why_explanation"]).strip()
+            except Exception:
+                # Retain deterministic narrative fallback on any unexpected exception
+                exec_answer = default_exec_answer
+                why_explanation = default_why_explanation
 
         return DecisionReport(
             query=query,
