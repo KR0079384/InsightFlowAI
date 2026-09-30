@@ -44,7 +44,7 @@ def mock_context():
                 "metric": "stockout_days",
                 "period": "2026-09",
                 "calculation": "COUNT(inventory.is_stock_out == 1)",
-                "formula": "8 days * $250 = $18,250",
+                "formula": "8 days * 7.6 avg daily units * $250 ≈ $15,200 opportunity",
                 "source_files": ["inventory.csv"],
                 "sample_rows": [],
                 "confidence_score": 1.0
@@ -69,7 +69,7 @@ def mock_context():
 def test_successful_synthesis(synthesizer, mock_context):
     valid_narrative = {
         "executive_answer": "September revenue dropped by 13.8% to $112,060.00 compared to $130,000.00 in August.",
-        "why_explanation": "AeroMax Pro Headphones suffered 8 consecutive stockout days costing -$18,250.00."
+        "why_explanation": "AeroMax Pro Headphones had 8 stockout days, with an estimated stockout opportunity of about $15,200."
     }
     
     mock_response = MagicMock()
